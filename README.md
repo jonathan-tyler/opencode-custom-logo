@@ -12,5 +12,5 @@ graphics protocol.
   sequences when the terminal advertises support.
 - The plugin falls back to character mode when Kitty graphics are unavailable.
 
-The implementation targets the OpenCode `v0.9.6` plugin API. See the sibling
-`../opencode-v0.9.6` checkout for reference-only source.
+The implementation targets the OpenCode `v1.18.0` plugin API. See the sibling
+`../opencode-v1.18.0` checkout for reference-only source.
