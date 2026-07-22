@@ -1,10 +1,18 @@
 {
   "name": "${localWorkspaceFolderBasename}-dev",
-  "image": "registry.access.redhat.com/hi/nodejs:24.18.0-builder",
+  "build": {
+    "dockerfile": "Containerfile",
+    "context": "."
+  },
+  "remoteUser": "nonroot",
+  "containerUser": "nonroot",
+  "containerEnv": {
+    "HOME": "/home/nonroot"
+  },
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
   "mounts": [
-    "type=volume,source=opencode-custom-logo-pnpm-store,target=/root/.local/share/pnpm/store"
+    "type=volume,source=opencode-custom-logo-pnpm-store,target=/home/nonroot/.local/share/pnpm/store"
   ],
   "customizations": {
     "vscode": {
