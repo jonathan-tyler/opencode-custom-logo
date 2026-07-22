@@ -1,5 +1,7 @@
 FROM registry.access.redhat.com/hi/nodejs:24.18.0-builder
 
+USER root
+
 RUN groupadd nonroot \
     && useradd --gid nonroot --create-home --shell /bin/bash nonroot \
     && mkdir -p /home/nonroot/.local/share/pnpm/store \
