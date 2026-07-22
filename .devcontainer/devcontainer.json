@@ -1,0 +1,17 @@
+{
+  "name": "${localWorkspaceFolderBasename}-dev",
+  "image": "registry.access.redhat.com/hi/nodejs:24.18.0-builder",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
+  "mounts": [
+    "type=volume,source=opencode-logo-plugin-pnpm-store,target=/root/.local/share/pnpm/store"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  }
+}
