@@ -8,7 +8,8 @@
   "containerUser": "nonroot",
   "updateRemoteUserUID": true,
   "runArgs": [
-    "--userns=keep-id"
+    "--userns=keep-id",
+    "--security-opt=no-new-privileges"
   ],
   "containerEnv": {
     "HOME": "/home/nonroot"
