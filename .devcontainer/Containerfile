@@ -1,7 +1,10 @@
 FROM registry.access.redhat.com/hi/nodejs:24.18.0-builder
 
-RUN groupadd --gid 1000 nonroot \
-    && useradd --uid 1000 --gid 1000 --create-home --shell /bin/bash nonroot \
+ARG USER_UID
+ARG USER_GID
+
+RUN groupadd --gid "${USER_GID}" nonroot \
+    && useradd --uid "${USER_UID}" --gid "${USER_GID}" --create-home --shell /bin/bash nonroot \
     && mkdir -p /home/nonroot/.local/share/pnpm/store \
     && chown -R nonroot:nonroot /home/nonroot
 
