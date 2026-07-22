@@ -2,14 +2,11 @@
   "name": "${localWorkspaceFolderBasename}-dev",
   "build": {
     "dockerfile": "Containerfile",
-    "context": ".",
-    "args": {
-      "USER_UID": "${localEnv:UID}",
-      "USER_GID": "${localEnv:GID}"
-    }
+    "context": "."
   },
   "remoteUser": "nonroot",
   "containerUser": "nonroot",
+  "updateRemoteUserUID": true,
   "runArgs": [
     "--userns=keep-id"
   ],
