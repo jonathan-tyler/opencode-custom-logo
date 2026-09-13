@@ -55,7 +55,13 @@ CLI and Podman installed:
 
 ```sh
 devcontainer up --workspace-folder . --docker-path podman
-devcontainer exec --workspace-folder . --docker-path podman pnpm install
 devcontainer exec --workspace-folder . --docker-path podman pnpm test
 devcontainer exec --workspace-folder . --docker-path podman pnpm typecheck
+```
+
+Dependency installation runs automatically during container creation. If the
+post-create setup fails, rerun the frozen install manually:
+
+```sh
+devcontainer exec --workspace-folder . --docker-path podman pnpm install --frozen-lockfile
 ```

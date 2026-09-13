@@ -20,6 +20,7 @@
     "type=volume,source=opencode-custom-logo-pnpm-store,target=/home/nonroot/.local/share/pnpm/store",
     "type=tmpfs,target=/tmp,tmpfs-mode=1777"
   ],
+  "postCreateCommand": "pnpm install --frozen-lockfile",
   "customizations": {
     "vscode": {
       "extensions": [
