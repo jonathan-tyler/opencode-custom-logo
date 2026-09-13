@@ -50,11 +50,12 @@ output.
 
 ## Develop
 
-Open this repository in its Dev Container. Then run these commands inside the
-container:
+Run these commands from the repository root on a host with the Dev Container
+CLI and Podman installed:
 
 ```sh
-pnpm install
-pnpm test
-pnpm typecheck
+devcontainer up --workspace-folder . --docker-path podman
+devcontainer exec --workspace-folder . --docker-path podman pnpm install
+devcontainer exec --workspace-folder . --docker-path podman pnpm test
+devcontainer exec --workspace-folder . --docker-path podman pnpm typecheck
 ```
