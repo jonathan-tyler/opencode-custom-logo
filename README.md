@@ -1,8 +1,7 @@
 # OpenCode Custom Logo
 
-A TUI plugin for OpenCode v1.18.0 that replaces the interactive home-screen
-logo with one configured multiline string. It does not change the startup
-splash or logos in CLI help and error output.
+A TUI plugin that replaces OpenCode's interactive home-screen logo with a
+configured multiline string.
 
 ## Install
 
@@ -15,8 +14,7 @@ set. From that directory, install its runtime dependencies:
 npx pnpm@10.17.1 install --prod --frozen-lockfile
 ```
 
-The package exposes its OpenCode v1.18.0 TUI entry point as `./tui`. Other
-OpenCode versions are not supported.
+The package exposes its OpenCode TUI entry point as `./tui`.
 
 ## Configure
 
@@ -45,10 +43,18 @@ other than line breaks are displayed as printable escapes, such as `\t` and
 Remove the plugin entry, or omit its `logo` option, to retain OpenCode's stock
 home logo.
 
+## Limitations
+
+The plugin does not change the startup splash or logos in CLI help and error
+output.
+
 ## Develop
 
+Open this repository in its Dev Container. Then run these commands inside the
+container:
+
 ```sh
-npx pnpm@10.17.1 install
-npx pnpm@10.17.1 test
-npx pnpm@10.17.1 typecheck
+pnpm install
+pnpm test
+pnpm typecheck
 ```
