@@ -10,6 +10,10 @@ test("preserves multiline logo characters, order, and line breaks", () => {
   )
 })
 
+test("preserves CRLF and lone carriage-return line breaks", () => {
+  assert.equal(escapeControlCharacters("first\r\nsecond\rthird"), "first\r\nsecond\rthird")
+})
+
 test("makes terminal control sequences printable instead of interpreting them", () => {
   assert.equal(
     escapeControlCharacters("\u001b[31mred\u001b[0m\ttab"),
