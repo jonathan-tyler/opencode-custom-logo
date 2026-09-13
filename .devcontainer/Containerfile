@@ -5,6 +5,19 @@ USER root
 RUN npm install --global pnpm@10.17.1 \
     && test "$(pnpm --version)" = "10.17.1"
 
+RUN microdnf install --assumeyes gzip tar \
+    && curl --fail --location --silent --show-error \
+        --output /tmp/just.tar.gz \
+        https://github.com/casey/just/releases/download/1.58.0/just-1.58.0-x86_64-unknown-linux-musl.tar.gz \
+    && echo "4a5cc2f53e6f0f8c59092a6cc38291eb729d46a7dd95d3ae582008881b84931d  /tmp/just.tar.gz" \
+        | sha256sum --check --strict \
+    && tar --extract --gzip --file /tmp/just.tar.gz --directory /tmp just \
+    && install --mode 0755 /tmp/just /usr/local/bin/just \
+    && test "$(just --version)" = "just 1.58.0" \
+    && rm --force /tmp/just /tmp/just.tar.gz \
+    && microdnf remove --assumeyes gzip tar \
+    && microdnf clean all
+
 RUN groupadd nonroot \
     && useradd --gid nonroot --create-home --shell /bin/bash nonroot \
     && mkdir -p /home/nonroot/.local/share/pnpm/store \
