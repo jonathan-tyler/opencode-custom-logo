@@ -6,7 +6,7 @@ USER root
 RUN npm install --global pnpm@10.17.1 \
     && test "$(pnpm --version)" = "10.17.1"
 
-RUN dnf install --assumeyes gzip tar \
+RUN dnf install --assumeyes gzip-1.14-2.4.hum1 tar-1.35-8.1.hum1 \
     && curl --fail --location --silent --show-error \
         --output /tmp/just.tar.gz \
         https://github.com/casey/just/releases/download/1.58.0/just-1.58.0-x86_64-unknown-linux-musl.tar.gz \
