@@ -1,11 +1,12 @@
-FROM registry.access.redhat.com/hi/nodejs:24.18.0-builder
+# Source: Red Hat Hummingbird nodejs:24.18.0-builder, Linux amd64; upstream repository https://gitlab.com/redhat/hummingbird/containers; source commit 275f647bdb171ad69696ff04f45ec6087b96d6c7
+FROM registry.access.redhat.com/hi/nodejs@sha256:2b7cb7e10d36bbd5736a1f643ee3b550ee1274b7ee1803efb0467ab13c328a00
 
 USER root
 
 RUN npm install --global pnpm@10.17.1 \
     && test "$(pnpm --version)" = "10.17.1"
 
-RUN microdnf install --assumeyes gzip tar \
+RUN dnf install --assumeyes gzip tar \
     && curl --fail --location --silent --show-error \
         --output /tmp/just.tar.gz \
         https://github.com/casey/just/releases/download/1.58.0/just-1.58.0-x86_64-unknown-linux-musl.tar.gz \
@@ -15,8 +16,8 @@ RUN microdnf install --assumeyes gzip tar \
     && install --mode 0755 /tmp/just /usr/local/bin/just \
     && test "$(just --version)" = "just 1.58.0" \
     && rm --force /tmp/just /tmp/just.tar.gz \
-    && microdnf remove --assumeyes gzip tar \
-    && microdnf clean all
+    && dnf remove --assumeyes gzip tar \
+    && dnf clean all
 
 RUN groupadd nonroot \
     && useradd --gid nonroot --create-home --shell /bin/bash nonroot \
