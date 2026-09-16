@@ -65,3 +65,17 @@ post-create setup fails, rerun the frozen install manually:
 ```sh
 devcontainer exec --workspace-folder . --docker-path podman pnpm install --frozen-lockfile
 ```
+
+Inside the Dev Container, launch an isolated production-style visual check with
+one of these recipes:
+
+```sh
+just tui-configured <logo-file>
+just tui-unconfigured
+```
+
+The configured recipe requires a readable UTF-8 file and preserves its complete
+contents as the `logo` value. Both recipes copy the plugin into temporary,
+isolated OpenCode configuration, install its production dependencies, and
+remove that temporary state when OpenCode exits. They do not read or modify the
+user's normal OpenCode configuration or data.
