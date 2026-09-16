@@ -66,8 +66,13 @@ post-create setup fails, rerun the frozen install manually:
 devcontainer exec --workspace-folder . --docker-path podman pnpm install --frozen-lockfile
 ```
 
-Inside the Dev Container, launch an isolated production-style visual check with
-one of these recipes:
+Inside the Dev Container, launch the bundled example with:
+
+```sh
+just tui-configured examples/custom-logo.txt
+```
+
+To use another logo file or launch the unconfigured harness, run:
 
 ```sh
 just tui-configured <logo-file>
