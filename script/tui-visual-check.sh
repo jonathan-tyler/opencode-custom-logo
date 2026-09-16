@@ -6,7 +6,7 @@ readonly mode="${1:-}"
 readonly logo_file="${2:-}"
 readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly repository_root="$(git -C "${script_dir}" rev-parse --show-toplevel)"
-readonly expected_root="/workspaces/$(basename -- "${repository_root}")"
+readonly expected_root="/workspaces/opencode-custom-logo"
 
 fail() {
   printf 'Error: %s\n' "$*" >&2
@@ -19,6 +19,18 @@ fi
 
 if [[ "${repository_root}" != "${expected_root}" ]]; then
   fail "expected the Dev Container repository at ${expected_root}, found ${repository_root}"
+fi
+
+if [[ "$(id -un)" != "nonroot" || "${HOME}" != "/home/nonroot" ]]; then
+  fail "expected the opencode-custom-logo Dev Container nonroot user"
+fi
+
+if [[ "$(pnpm --version)" != "10.17.1" || "$(just --version)" != "just 1.58.0" ]]; then
+  fail "expected the pinned opencode-custom-logo Dev Container tools"
+fi
+
+if [[ "$(node -p 'require(process.argv[1]).name' "${repository_root}/package.json")" != "opencode-custom-logo" ]]; then
+  fail "repository package identity is not opencode-custom-logo"
 fi
 
 readonly head_revision="$(git -C "${repository_root}" rev-parse HEAD)"
@@ -79,7 +91,7 @@ if [[ "${mode}" == "configured" ]]; then
 import { readFileSync, writeFileSync } from "node:fs"
 
 const [, , logoPath, configPath] = process.argv
-const logo = new TextDecoder("utf-8", { fatal: true }).decode(readFileSync(logoPath))
+const logo = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(readFileSync(logoPath))
 const config = {
   $schema: "https://opencode.ai/tui.json",
   plugin: [["./plugins/opencode-custom-logo", { logo }]],
