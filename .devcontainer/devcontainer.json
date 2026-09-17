@@ -1,5 +1,5 @@
 {
-  "name": "${localWorkspaceFolderBasename}-dev",
+  "name": "${localWorkspaceFolderBasename}",
   "build": {
     "dockerfile": "Containerfile",
     "context": "."
@@ -17,8 +17,7 @@
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind,consistency=cached",
   "mounts": [
-    "type=volume,source=opencode-custom-logo-pnpm-store,target=/home/nonroot/.local/share/pnpm/store",
-    "type=tmpfs,target=/tmp,tmpfs-mode=1777"
+    "type=volume,source=opencode-custom-logo-pnpm-store,target=/home/nonroot/.local/share/pnpm/store"
   ],
   "postCreateCommand": "pnpm install --frozen-lockfile",
   "customizations": {
