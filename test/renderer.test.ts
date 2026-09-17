@@ -7,8 +7,9 @@ import test from "node:test"
 test("renders file-backed and inline logos as complete escaped literals", async (context) => {
   const configDirectory = await mkdtemp(join(tmpdir(), "opencode-custom-logo-test-"))
   context.after(() => rm(configDirectory, { recursive: true, force: true }))
+  const logoPath = join(configDirectory, "logo.md")
   await writeFile(
-    join(configDirectory, "logo.md"),
+    logoPath,
     "# literal Markdown\nfirst\n\u001b[31msecond\u001b[0m\n",
   )
 
@@ -45,6 +46,22 @@ test("renders file-backed and inline logos as complete escaped literals", async 
     type: "text",
     properties: {
       children: "# literal Markdown\nfirst\n\\u001b[31msecond\\u001b[0m\n",
+    },
+  })
+
+  await writeFile(logoPath, "changed\n")
+  assert.deepEqual(registered?.slots.home_logo(), {
+    type: "text",
+    properties: {
+      children: "# literal Markdown\nfirst\n\\u001b[31msecond\\u001b[0m\n",
+    },
+  })
+
+  await plugin.tui(api as never, { logoFile: "logo.md" })
+  assert.deepEqual(registered?.slots.home_logo(), {
+    type: "text",
+    properties: {
+      children: "changed\n",
     },
   })
 
