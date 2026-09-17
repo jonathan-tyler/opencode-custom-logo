@@ -9,6 +9,7 @@
   },
   "scripts": {
     "test": "tsx --test --experimental-test-module-mocks test/**/*.test.ts",
+    "test:install": "./test/install.sh",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

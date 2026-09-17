@@ -1,20 +1,28 @@
 # OpenCode Custom Logo
 
-A TUI plugin that replaces OpenCode's interactive home-screen logo with a
-configured multiline string.
+OpenCode TUI plugin that replaces the home-screen logo with a configured multiline string.
 
 ## Install
 
-Place this package at
-`$XDG_CONFIG_HOME/opencode/plugins/opencode-custom-logo`, or at
-`~/.config/opencode/plugins/opencode-custom-logo` when `XDG_CONFIG_HOME` is not
-set. From that directory, install its runtime dependencies:
+Clone the confirmed public repository, inspect the checkout and installer, then
+run the repository-owned installer:
 
 ```sh
-npx pnpm@10.17.1 install --prod --frozen-lockfile
+git clone https://github.com/jonathan-tyler/opencode-custom-logo
+cd opencode-custom-logo
+git status --short --branch
+git log --oneline --decorate -5
+git ls-files
+git show HEAD:script/install.sh
+./script/install.sh
 ```
 
-The package exposes its OpenCode TUI entry point as `./tui`.
+The script installs the runtime package and its production dependencies at
+`$XDG_CONFIG_HOME/opencode/plugins/opencode-custom-logo`. When
+`XDG_CONFIG_HOME` is not set, it uses
+`$HOME/.config/opencode/plugins/opencode-custom-logo`. It refuses to replace an
+existing installation. The installed package exposes its OpenCode TUI entry
+point as `./tui`.
 
 ## Configure
 
