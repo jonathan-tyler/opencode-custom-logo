@@ -75,6 +75,7 @@ readonly xdg_state_home="${temporary_root}/state"
 readonly opencode_config_dir="${xdg_config_home}/opencode"
 readonly plugin_dir="${opencode_config_dir}/plugins/opencode-custom-logo"
 readonly tui_config="${opencode_config_dir}/tui.json"
+readonly isolated_logo_file="${opencode_config_dir}/custom-logo.txt"
 
 mkdir -p \
   "${isolated_home}" \
@@ -87,17 +88,20 @@ cp -- "${repository_root}/package.json" "${repository_root}/pnpm-lock.yaml" "${p
 cp -R -- "${repository_root}/src" "${plugin_dir}/src"
 
 if [[ "${mode}" == "configured" ]]; then
-  node - "${logo_file}" "${tui_config}" <<'NODE'
-import { readFileSync, writeFileSync } from "node:fs"
-
-const [, , logoPath, configPath] = process.argv
-const logo = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(readFileSync(logoPath))
-const config = {
-  $schema: "https://opencode.ai/tui.json",
-  plugin: [["./plugins/opencode-custom-logo", { logo }]],
+  cp -- "${logo_file}" "${isolated_logo_file}"
+  cat >"${tui_config}" <<'JSON'
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": [
+    [
+      "./plugins/opencode-custom-logo",
+      {
+        "logoFile": "custom-logo.txt"
+      }
+    ]
+  ]
 }
-writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8")
-NODE
+JSON
   readonly expected_observation="the custom logo is readable with literal controls and preserved line order, and the stock logo is absent"
 else
   cat >"${tui_config}" <<'JSON'
@@ -134,6 +138,9 @@ printf 'Isolated data: %s\n' "${xdg_data_home}"
 printf 'Isolated cache: %s\n' "${xdg_cache_home}"
 printf 'Isolated state: %s\n' "${xdg_state_home}"
 printf 'Plugin copy: %s\n' "${plugin_dir}"
+if [[ "${mode}" == "configured" ]]; then
+  printf 'Logo file: %s (logoFile: custom-logo.txt)\n' "${isolated_logo_file}"
+fi
 printf 'Expected observation: %s.\n' "${expected_observation}"
 printf 'Cleanup: all harness-created state under %s will be removed when OpenCode exits.\n\n' "${temporary_root}"
 

@@ -28,6 +28,31 @@ Add the plugin to `$XDG_CONFIG_HOME/opencode/tui.json`, or to
     [
       "./plugins/opencode-custom-logo",
       {
+        "logoFile": "logos/home-logo.txt"
+      }
+    ]
+  ]
+}
+```
+
+`logoFile` is resolved relative to the global OpenCode configuration directory
+that contains this `tui.json`. The file must be UTF-8. Its complete contents,
+including a final newline, are used as literal text; Markdown is not rendered.
+Terminal control characters other than line breaks are displayed as printable
+escapes, such as `\t` and `\u001b`, so ANSI sequences are not interpreted.
+
+Restart OpenCode or otherwise reinitialize the plugin after changing the file.
+The plugin does not watch it for changes.
+
+An inline `logo` string remains available as an alternative:
+
+```json
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": [
+    [
+      "./plugins/opencode-custom-logo",
+      {
         "logo": "first line\nsecond line\nthird line"
       }
     ]
@@ -35,13 +60,8 @@ Add the plugin to `$XDG_CONFIG_HOME/opencode/tui.json`, or to
 }
 ```
 
-The configuration key is `logo` in this plugin's options object. Its string
-value preserves character order and line breaks. Terminal control characters
-other than line breaks are displayed as printable escapes, such as `\t` and
-`\u001b`, so ANSI sequences are not interpreted.
-
-Remove the plugin entry, or omit its `logo` option, to retain OpenCode's stock
-home logo.
+Remove the plugin entry, or omit both `logoFile` and `logo`, to retain OpenCode's
+stock home logo.
 
 ## Limitations
 
@@ -79,8 +99,9 @@ just tui-configured <logo-file>
 just tui-unconfigured
 ```
 
-The configured recipe requires a readable UTF-8 file and preserves its complete
-contents as the `logo` value. Both recipes copy the plugin into temporary,
-isolated OpenCode configuration, install its production dependencies, and
-remove that temporary state when OpenCode exits. They do not read or modify the
-user's normal OpenCode configuration or data.
+The configured recipe copies the supplied file into temporary configuration and
+passes its relative path as `logoFile`, so the runtime plugin reads it directly.
+Both recipes copy the plugin into temporary, isolated OpenCode configuration,
+install its production dependencies, and remove that temporary state when
+OpenCode exits. They do not read or modify the user's normal OpenCode
+configuration or data.
