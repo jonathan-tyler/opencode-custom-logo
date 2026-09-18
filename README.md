@@ -4,16 +4,12 @@ OpenCode TUI plugin that replaces the home-screen logo with a configured multili
 
 ## Install
 
-Clone the confirmed public repository, inspect the checkout and installer, then
-run the repository-owned installer:
+Clone the repository, change into the checkout, and run the repository-owned
+installer:
 
 ```sh
 git clone https://github.com/jonathan-tyler/opencode-custom-logo
 cd opencode-custom-logo
-git status --short --branch
-git log --oneline --decorate -5
-git ls-files
-git show HEAD:script/install.sh
 ./script/install.sh
 ```
 
