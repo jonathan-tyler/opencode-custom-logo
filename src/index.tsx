@@ -2,7 +2,6 @@ import { readFile } from "node:fs/promises"
 import { isAbsolute, resolve } from "node:path"
 
 import type { TuiPluginModule } from "@opencode-ai/plugin/tui"
-import { RGBA, TextAttributes } from "@opentui/core"
 
 import {
   escapeControlCharacters,
@@ -17,6 +16,33 @@ type CustomLogoOptions = {
   logo?: unknown
   logoFile?: unknown
 }
+
+const TEXT_ATTRIBUTES = {
+  bold: 1 << 0,
+  dim: 1 << 1,
+  italic: 1 << 2,
+  underline: 1 << 3,
+  strikethrough: 1 << 7,
+} as const
+
+const ANSI_BASE_COLORS = [
+  [0, 0, 0],
+  [128, 0, 0],
+  [0, 128, 0],
+  [128, 128, 0],
+  [0, 0, 128],
+  [128, 0, 128],
+  [0, 128, 128],
+  [192, 192, 192],
+  [128, 128, 128],
+  [255, 0, 0],
+  [0, 255, 0],
+  [255, 255, 0],
+  [0, 0, 255],
+  [255, 0, 255],
+  [0, 255, 255],
+  [255, 255, 255],
+] as const
 
 const plugin = {
   id: "opencode-custom-logo",
@@ -67,25 +93,45 @@ const plugin = {
 export default plugin
 
 function textProperties(style: AnsiStyle): {
-  fg?: RGBA
-  bg?: RGBA
+  fg?: string
+  bg?: string
   attributes?: number
 } {
-  const properties: { fg?: RGBA; bg?: RGBA; attributes?: number } = {}
+  const properties: { fg?: string; bg?: string; attributes?: number } = {}
   if (style.foreground) properties.fg = toOpenTuiColor(style.foreground)
   if (style.background) properties.bg = toOpenTuiColor(style.background)
 
-  let attributes = TextAttributes.NONE
-  if (style.bold) attributes |= TextAttributes.BOLD
-  if (style.dim) attributes |= TextAttributes.DIM
-  if (style.italic) attributes |= TextAttributes.ITALIC
-  if (style.underline) attributes |= TextAttributes.UNDERLINE
-  if (style.strikethrough) attributes |= TextAttributes.STRIKETHROUGH
-  if (attributes !== TextAttributes.NONE) properties.attributes = attributes
+  let attributes = 0
+  if (style.bold) attributes |= TEXT_ATTRIBUTES.bold
+  if (style.dim) attributes |= TEXT_ATTRIBUTES.dim
+  if (style.italic) attributes |= TEXT_ATTRIBUTES.italic
+  if (style.underline) attributes |= TEXT_ATTRIBUTES.underline
+  if (style.strikethrough) attributes |= TEXT_ATTRIBUTES.strikethrough
+  if (attributes !== 0) properties.attributes = attributes
   return properties
 }
 
-function toOpenTuiColor(color: AnsiColor): RGBA {
-  if (color.type === "indexed") return RGBA.fromIndex(color.value)
-  return RGBA.fromInts(color.red, color.green, color.blue)
+function toOpenTuiColor(color: AnsiColor): string {
+  if (color.type === "rgb") return rgbToHex(color.red, color.green, color.blue)
+  const index = color.value
+  if (index < ANSI_BASE_COLORS.length) {
+    const [red, green, blue] = ANSI_BASE_COLORS[index]!
+    return rgbToHex(red, green, blue)
+  }
+  if (index >= 232) {
+    const value = 8 + (index - 232) * 10
+    return rgbToHex(value, value, value)
+  }
+
+  const cubeIndex = index - 16
+  const levels = [0, 95, 135, 175, 215, 255] as const
+  return rgbToHex(
+    levels[Math.floor(cubeIndex / 36)]!,
+    levels[Math.floor((cubeIndex % 36) / 6)]!,
+    levels[cubeIndex % 6]!,
+  )
+}
+
+function rgbToHex(red: number, green: number, blue: number): string {
+  return `#${[red, green, blue].map((value) => value.toString(16).padStart(2, "0")).join("")}`
 }

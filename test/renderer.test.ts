@@ -89,8 +89,8 @@ const expectedStyledRender = {
       {
         type: "span",
         properties: {
-          fg: { intent: "indexed", slot: 1 },
-          bg: { intent: "indexed", slot: 12 },
+          fg: "#800000",
+          bg: "#0000ff",
           attributes: 143,
           children: "standard",
         },
@@ -99,8 +99,8 @@ const expectedStyledRender = {
       {
         type: "span",
         properties: {
-          fg: { intent: "indexed", slot: 120 },
-          bg: { intent: "indexed", slot: 136 },
+          fg: "#87ff87",
+          bg: "#af8700",
           children: "indexed",
         },
       },
@@ -108,8 +108,8 @@ const expectedStyledRender = {
       {
         type: "span",
         properties: {
-          fg: { intent: "rgb", slot: 0, rgba: [12, 34, 56, 255] },
-          bg: { intent: "rgb", slot: 0, rgba: [65, 43, 21, 255] },
+          fg: "#0c2238",
+          bg: "#412b15",
           children: "RGB",
         },
       },
@@ -121,15 +121,6 @@ const expectedStyledRender = {
 function summarize(node: unknown): unknown {
   if (Array.isArray(node)) return node.map(summarize)
   if (node === null || typeof node !== "object") return node
-  if ("intent" in node && "slot" in node && "toInts" in node) {
-    const color = node as {
-      intent: string
-      slot: number
-      toInts(): [number, number, number, number]
-    }
-    if (color.intent === "indexed") return { intent: color.intent, slot: color.slot }
-    return { intent: color.intent, slot: color.slot, rgba: color.toInts() }
-  }
   return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, summarize(value)]))
 }
 
