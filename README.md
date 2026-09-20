@@ -113,7 +113,7 @@ devcontainer exec --workspace-folder . --docker-path podman pnpm install --froze
 Inside the Dev Container, launch the bundled example with:
 
 ```sh
-just tui-configured examples/custom-logo.txt
+just tui-configured
 ```
 
 To use another logo file or launch the unconfigured harness, run:
@@ -123,8 +123,9 @@ just tui-configured <logo-file>
 just tui-unconfigured
 ```
 
-The configured recipe copies the supplied file into temporary configuration and
-passes its relative path as `logoFile`, so the runtime plugin reads it directly.
+The configured recipe copies the bundled example or supplied override into
+temporary configuration and passes its relative path as `logoFile`, so the
+runtime plugin reads it directly.
 Both recipes copy the plugin into temporary, isolated OpenCode configuration,
 install its production dependencies, and remove that temporary state when
 OpenCode exits. They do not read or modify the user's normal OpenCode
