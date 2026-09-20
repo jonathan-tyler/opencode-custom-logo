@@ -102,7 +102,7 @@ if [[ "${mode}" == "configured" ]]; then
   ]
 }
 JSON
-  readonly expected_observation="the custom logo has five aligned green-and-gold rows, no printed escape notation or style bleed, and the stock logo is absent"
+  readonly expected_observation="the custom logo has five aligned green-gradient rows, no printed escape notation or style bleed, and the stock logo is absent"
 else
   cat >"${tui_config}" <<'JSON'
 {

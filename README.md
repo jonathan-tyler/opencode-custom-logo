@@ -61,9 +61,9 @@ terminal renderer. OpenCode Custom Logo v0.1.0 displayed even valid SGR escape
 bytes as printable text; valid supported SGR now applies formatting, with no
 literal-ESC compatibility switch.
 
-The bundled `examples/custom-logo.txt` demonstrates 256-color SGR with a reset
-on every row: light greens 120 and 84, dark gold 136, very dark green 22, and
-medium green 34.
+The bundled `examples/custom-logo.txt` demonstrates 24-bit RGB SGR with a reset
+on every row. Its five content rows form a green gradient using `#252D25`,
+`#252D25`, `#1F251F`, `#181E18`, and `#121612` from top to bottom.
 
 Restart OpenCode or otherwise reinitialize the plugin after changing the file.
 The plugin does not watch it for changes.

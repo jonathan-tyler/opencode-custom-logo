@@ -129,7 +129,7 @@ test("rejects a whole SGR sequence without partially applying supported paramete
   ])
 })
 
-test("bundled example preserves its five rows and resets each requested indexed color", async () => {
+test("bundled example preserves its five rows and resets each exact RGB gradient color", async () => {
   const example = await readFile(new URL("../examples/custom-logo.txt", import.meta.url), "utf8")
   assert.equal(
     example.replace(/\u001b\[[0-9;]+m/gu, ""),
@@ -142,17 +142,29 @@ test("bundled example preserves its five rows and resets each requested indexed 
   assert.deepEqual(
     parseAnsiStyledLogo(example).map((run) => ({ text: run.text, color: run.style.foreground })),
     [
-      { text: "                      ▄", color: { type: "indexed", value: 120 } },
+      {
+        text: "                      ▄",
+        color: { type: "rgb", red: 37, green: 45, blue: 37 },
+      },
       { text: "\n", color: undefined },
-      { text: "  ▄▄▄  ▄▄▄ ▄▄  ▄▄▄   ██    ▄▄▄  ▄ ▄▄ ▄▄▄", color: { type: "indexed", value: 84 } },
+      {
+        text: "  ▄▄▄  ▄▄▄ ▄▄  ▄▄▄   ██    ▄▄▄  ▄ ▄▄ ▄▄▄",
+        color: { type: "rgb", red: 37, green: 45, blue: 37 },
+      },
       { text: "\n", color: undefined },
-      { text: "▄██ ▀█  ██ █  ▀██▄  ▀██▀  ██ ██  ██ ██ ██", color: { type: "indexed", value: 136 } },
+      {
+        text: "▄██ ▀█  ██ █  ▀██▄  ▀██▀  ██ ██  ██ ██ ██",
+        color: { type: "rgb", red: 31, green: 37, blue: 31 },
+      },
       { text: "\n", color: undefined },
-      { text: "███     ██ █    ▀██  ██   ██ ██  ██ ██ ██", color: { type: "indexed", value: 22 } },
+      {
+        text: "███     ██ █    ▀██  ██   ██ ██  ██ ██ ██",
+        color: { type: "rgb", red: 24, green: 30, blue: 24 },
+      },
       { text: "\n", color: undefined },
       {
         text: " ▀█▄▄▀  ▀█▄▀▄ ▀▄▄█▀  ▀█▄▀ ▀█▄█▀ ▄██ ██ ██▄",
-        color: { type: "indexed", value: 34 },
+        color: { type: "rgb", red: 18, green: 22, blue: 18 },
       },
       { text: "\n", color: undefined },
     ],
