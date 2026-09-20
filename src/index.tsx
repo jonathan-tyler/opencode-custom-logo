@@ -17,14 +17,6 @@ type CustomLogoOptions = {
   logoFile?: unknown
 }
 
-const TEXT_ATTRIBUTES = {
-  bold: 1 << 0,
-  dim: 1 << 1,
-  italic: 1 << 2,
-  underline: 1 << 3,
-  strikethrough: 1 << 7,
-} as const
-
 const ANSI_BASE_COLORS = [
   [0, 0, 0],
   [128, 0, 0],
@@ -81,7 +73,7 @@ const plugin = {
         home_logo: () => (
           <text>
             {runs.map((run) => (
-              <span {...textProperties(run.style)}>{run.text}</span>
+              <span style={textStyle(run.style)}>{run.text}</span>
             ))}
           </text>
         ),
@@ -92,22 +84,23 @@ const plugin = {
 
 export default plugin
 
-function textProperties(style: AnsiStyle): {
+function textStyle(style: AnsiStyle): {
   fg?: string
   bg?: string
-  attributes?: number
+  bold?: boolean
+  dim?: boolean
+  italic?: boolean
+  underline?: boolean
+  strikethrough?: boolean
 } {
-  const properties: { fg?: string; bg?: string; attributes?: number } = {}
+  const properties: ReturnType<typeof textStyle> = {}
   if (style.foreground) properties.fg = toOpenTuiColor(style.foreground)
   if (style.background) properties.bg = toOpenTuiColor(style.background)
-
-  let attributes = 0
-  if (style.bold) attributes |= TEXT_ATTRIBUTES.bold
-  if (style.dim) attributes |= TEXT_ATTRIBUTES.dim
-  if (style.italic) attributes |= TEXT_ATTRIBUTES.italic
-  if (style.underline) attributes |= TEXT_ATTRIBUTES.underline
-  if (style.strikethrough) attributes |= TEXT_ATTRIBUTES.strikethrough
-  if (attributes !== 0) properties.attributes = attributes
+  if (style.bold) properties.bold = true
+  if (style.dim) properties.dim = true
+  if (style.italic) properties.italic = true
+  if (style.underline) properties.underline = true
+  if (style.strikethrough) properties.strikethrough = true
   return properties
 }
 

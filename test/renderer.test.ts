@@ -56,7 +56,9 @@ test("renders file-backed and inline ANSI logos as safe styled runs", async (con
   await plugin.tui(api as never, { logoFile: "logo.txt" })
   assert.deepEqual(summarize(registered?.slots.home_logo()), {
     type: "text",
-    properties: { children: [{ type: "span", properties: { children: "changed\n" } }] },
+    properties: {
+      children: [{ type: "span", properties: { style: {}, children: "changed\n" } }],
+    },
   })
 
   await plugin.tui(api as never, { logo: styledLogo })
@@ -72,6 +74,7 @@ test("renders file-backed and inline ANSI logos as safe styled runs", async (con
         {
           type: "span",
           properties: {
+            style: {},
             children:
               "\\u001b[5mblink\\u001b[2Jerase\\u001b]8;;https://example.com\\u0007link",
           },
@@ -89,31 +92,35 @@ const expectedStyledRender = {
       {
         type: "span",
         properties: {
-          fg: "#800000",
-          bg: "#0000ff",
-          attributes: 143,
+          style: {
+            fg: "#800000",
+            bg: "#0000ff",
+            bold: true,
+            dim: true,
+            italic: true,
+            underline: true,
+            strikethrough: true,
+          },
           children: "standard",
         },
       },
-      { type: "span", properties: { children: "\n" } },
+      { type: "span", properties: { style: {}, children: "\n" } },
       {
         type: "span",
         properties: {
-          fg: "#87ff87",
-          bg: "#af8700",
+          style: { fg: "#87ff87", bg: "#af8700" },
           children: "indexed",
         },
       },
-      { type: "span", properties: { children: "\n" } },
+      { type: "span", properties: { style: {}, children: "\n" } },
       {
         type: "span",
         properties: {
-          fg: "#0c2238",
-          bg: "#412b15",
+          style: { fg: "#0c2238", bg: "#412b15" },
           children: "RGB",
         },
       },
-      { type: "span", properties: { children: "\n" } },
+      { type: "span", properties: { style: {}, children: "\n" } },
     ],
   },
 }
