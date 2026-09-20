@@ -28,7 +28,7 @@ test("documents executable package installation commands", async (context) => {
   const commands = fencedBlocks(installSection, "sh")
   assert.deepEqual(commands, [
     'opencode plugin "git+https://github.com/jonathan-tyler/' +
-      'opencode-custom-logo.git#v0.2.1" --global',
+      'opencode-custom-logo.git#vX.Y.Z" --global',
     "chezmoi apply",
   ])
 
@@ -47,7 +47,7 @@ test("documents executable package installation commands", async (context) => {
 set -eu
 test "$#" -eq 3
 test "$1" = plugin
-test "$2" = "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1"
+test "$2" = "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#vX.Y.Z"
 test "$3" = --global
 mkdir -p "$XDG_CONFIG_HOME/opencode"
 printf '%s\n' installed >"$XDG_CONFIG_HOME/opencode/tui.json"
@@ -94,9 +94,19 @@ test("keeps every README shell example syntactically valid", async () => {
   }
 })
 
-test("marks v0.2.0 as defective without using it in a package spec", () => {
-  assert.match(readme, /v0\.2\.0.*does not activate its TUI package entrypoint/su)
-  assert.doesNotMatch(readme, /opencode-custom-logo\.git#v0\.2\.0/u)
+test("uses a stable pseudoversion without routine release history", () => {
+  const packageVersions = [
+    ...readme.matchAll(/opencode-custom-logo\.git#([^"\s]+)/gu),
+  ].map(([, version]) => version)
+  assert.ok(packageVersions.length > 0)
+  assert.deepEqual([...new Set(packageVersions)], ["vX.Y.Z"])
+
+  const installSection = section(readme, "## Install", "## Configure")
+  const substitutionGuidance = installSection.match(
+    /[^.\n]*replace[^.\n]*`vX\.Y\.Z`[^.\n]*immutable release tag[^.\n]*\./giu,
+  )
+  assert.equal(substitutionGuidance?.length, 1)
+  assert.doesNotMatch(readme, /\bv0\.(?:1|2)\.0\b/u)
 })
 
 test("documents a generic default chezmoi source file", () => {
@@ -109,7 +119,7 @@ test("documents a generic default chezmoi source file", () => {
   assert.match(chezmoi, /~\/\.config\/opencode\/tui\.json/)
   assert.match(
     chezmoi,
-    /git\+https:\/\/github\.com\/jonathan-tyler\/opencode-custom-logo\.git#v0\.2\.1/,
+    /git\+https:\/\/github\.com\/jonathan-tyler\/opencode-custom-logo\.git#vX\.Y\.Z/,
   )
   assert.doesNotMatch(
     chezmoi,

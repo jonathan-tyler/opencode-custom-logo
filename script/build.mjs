@@ -7,6 +7,8 @@ import { promisify } from "node:util"
 
 const execFileAsync = promisify(execFile)
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)))
+
+// Resolve isolated output without allowing generated files to replace the repository root.
 const outputArgument = process.argv.indexOf("--out-dir")
 if (outputArgument !== -1) {
   assert.ok(process.argv[outputArgument + 1], "--out-dir requires a path")
@@ -17,6 +19,7 @@ const outputDirectory = resolve(
 )
 assert.notEqual(outputDirectory, repositoryRoot, "refusing to emit over the repository root")
 
+// Rebuild the artifact from source in a clean output directory.
 await rm(outputDirectory, { recursive: true, force: true })
 await mkdir(outputDirectory, { recursive: true })
 await execFileAsync(
@@ -31,6 +34,7 @@ await execFileAsync(
   { cwd: repositoryRoot },
 )
 
+// Bind emitted JSX to OpenCode's host runtime instead of a package-local renderer.
 const entrypoint = resolve(outputDirectory, "index.js")
 const emitted = await readFile(entrypoint, "utf8")
 const jsxRuntime = 'from "@opentui/solid/jsx-runtime"'

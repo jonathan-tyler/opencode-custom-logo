@@ -13,6 +13,7 @@ fail() {
   exit 1
 }
 
+# Refuse host or look-alike environments before touching temporary state.
 if [[ ! -f /run/.containerenv && ! -f /.dockerenv ]]; then
   fail "run this harness inside the repository Dev Container"
 fi
@@ -33,6 +34,7 @@ if [[ "$(node -p 'require(process.argv[1]).name' "${repository_root}/package.jso
   fail "repository package identity is not opencode-custom-logo"
 fi
 
+# Pin the visual observation to a clean repository revision.
 readonly head_revision="$(git -C "${repository_root}" rev-parse HEAD)"
 printf 'Repository HEAD: %s\n' "${head_revision}"
 
@@ -40,6 +42,7 @@ if [[ -n "$(git -C "${repository_root}" status --porcelain --untracked-files=no)
   fail "tracked repository changes exist; commit or restore them before running the harness"
 fi
 
+# Validate the requested observation before creating isolated state.
 case "${mode}" in
   configured)
     [[ $# -eq 2 ]] || fail "usage: $0 configured <logo-file>"
@@ -53,6 +56,7 @@ case "${mode}" in
     ;;
 esac
 
+# Remove only harness-owned state, including after an interrupt.
 temporary_root=""
 cleanup() {
   if [[ -n "${temporary_root}" && -d "${temporary_root}" ]]; then
@@ -65,6 +69,7 @@ trap 'exit 129' HUP
 trap 'exit 130' INT
 trap 'exit 143' TERM
 
+# Isolate every OpenCode state root from the user's environment.
 temporary_root="$(mktemp -d "${TMPDIR:-/tmp}/opencode-custom-logo-tui.XXXXXX")"
 readonly temporary_root
 readonly isolated_home="${temporary_root}/home"
@@ -84,9 +89,11 @@ mkdir -p \
   "${xdg_state_home}" \
   "${plugin_dir}"
 
+# Stage only the package artifact and dependency metadata used by OpenCode.
 cp -- "${repository_root}/package.json" "${repository_root}/pnpm-lock.yaml" "${plugin_dir}/"
 cp -R -- "${repository_root}/dist" "${plugin_dir}/dist"
 
+# Generate the minimal configuration for the requested visual observation.
 if [[ "${mode}" == "configured" ]]; then
   cp -- "${logo_file}" "${isolated_logo_file}"
   cat >"${tui_config}" <<'JSON'
@@ -116,6 +123,7 @@ JSON
   readonly expected_observation="the stock OpenCode logo is visible"
 fi
 
+# Prevent inherited OpenCode state from escaping the isolated XDG roots.
 export HOME="${isolated_home}"
 export XDG_CONFIG_HOME="${xdg_config_home}"
 export XDG_DATA_HOME="${xdg_data_home}"
@@ -148,6 +156,7 @@ fi
 printf 'Expected observation: %s.\n' "${expected_observation}"
 printf 'Cleanup: all harness-created state under %s will be removed when OpenCode exits.\n\n' "${temporary_root}"
 
+# Install production dependencies in the staged package before launching OpenCode.
 (
   cd -- "${plugin_dir}"
   npx pnpm@10.17.1 install --prod --frozen-lockfile

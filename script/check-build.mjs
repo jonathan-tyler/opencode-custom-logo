@@ -8,6 +8,8 @@ import { promisify } from "node:util"
 
 const execFileAsync = promisify(execFile)
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)))
+
+// Generate into isolation so verification cannot alter committed artifacts.
 const temporaryRoot = await mkdtemp(join(tmpdir(), "opencode-custom-logo-build-check-"))
 
 try {
@@ -22,6 +24,7 @@ try {
     { cwd: repositoryRoot },
   )
 
+  // Require the committed artifact to match the deterministic build byte for byte.
   const committedDirectory = join(repositoryRoot, "dist")
   const generatedFiles = await filesBelow(generatedDirectory)
   const committedFiles = await filesBelow(committedDirectory)
@@ -34,6 +37,7 @@ try {
     )
   }
 
+  // Keep first load on the prebuilt export and independent of lifecycle preparation.
   const manifest = JSON.parse(await readFile(join(repositoryRoot, "package.json"), "utf8"))
   assert.equal(manifest.exports?.["./tui"], "./dist/index.js")
   for (const preparationTrigger of [
@@ -51,6 +55,7 @@ try {
     )
   }
 
+  // Ensure JSX shares OpenCode's host OpenTUI and Solid runtime.
   const artifact = await readFile(join(committedDirectory, "index.js"), "utf8")
   assert.match(
     artifact,
@@ -58,6 +63,7 @@ try {
     "the artifact must bind JSX to OpenCode's host OpenTUI and Solid runtime",
   )
 
+  // Limit the immutable package contract to runtime files and user documentation.
   const archive = join(temporaryRoot, "package.tgz")
   const { stdout } = await execFileAsync("pnpm", ["pack", "--json", "--out", archive], {
     cwd: repositoryRoot,

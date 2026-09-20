@@ -7,11 +7,10 @@ OpenCode TUI plugin that replaces the home-screen logo with a configured multili
 The only supported installation command is:
 
 ```sh
-opencode plugin "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1" --global
+opencode plugin "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#vX.Y.Z" --global
 ```
 
-Version `v0.2.0` installs but does not activate its TUI package entrypoint
-correctly on supported OpenCode v1.18.0. Do not use or retag it.
+Replace `vX.Y.Z` with the immutable release tag you intend to install.
 
 OpenCode synchronously installs this package and its production dependencies
 through its embedded package service before importing the TUI entry point. The
@@ -39,7 +38,7 @@ file to `~/.config/opencode/tui.json`. For example:
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1",
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#vX.Y.Z",
       {
         "logoFile": "logos/home-logo.txt"
       }
@@ -68,7 +67,7 @@ Add the plugin to `$XDG_CONFIG_HOME/opencode/tui.json`, or to
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1",
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#vX.Y.Z",
       {
         "logoFile": "logos/home-logo.txt"
       }
@@ -95,9 +94,7 @@ default:
 Indexed values and RGB channels must be between 0 and 255. Malformed,
 out-of-range, unsupported, or incomplete SGR and every non-SGR terminal control
 are displayed as printable escapes, e.g., `\u001b`, rather than sent to the
-terminal renderer. OpenCode Custom Logo v0.1.0 displayed even valid SGR escape
-bytes as printable text; valid supported SGR now applies formatting, with no
-literal-ESC compatibility switch.
+terminal renderer.
 
 The bundled `examples/custom-logo.txt` demonstrates 24-bit RGB SGR with a reset
 on every row. Its five content rows form a green gradient using `#252D25`,
@@ -113,7 +110,7 @@ An inline `logo` string remains available as an alternative:
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1",
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#vX.Y.Z",
       {
         "logo": "first line\nsecond line\nthird line"
       }
