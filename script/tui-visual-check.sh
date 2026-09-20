@@ -102,7 +102,11 @@ if [[ "${mode}" == "configured" ]]; then
   ]
 }
 JSON
-  readonly expected_observation="the custom logo has five aligned green-gradient rows, no printed escape notation or style bleed, and the stock logo is absent"
+  if [[ "${logo_file}" == "examples/custom-logo.txt" ]]; then
+    readonly expected_observation="the custom logo has five aligned green-gradient rows, no printed escape notation or style bleed, and the stock logo is absent"
+  else
+    readonly expected_observation="the supplied custom logo is visible, no supported SGR appears as printed escape notation or causes style bleed, and the stock logo is absent"
+  fi
 else
   cat >"${tui_config}" <<'JSON'
 {
