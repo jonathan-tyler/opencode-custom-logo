@@ -85,7 +85,7 @@ mkdir -p \
   "${plugin_dir}"
 
 cp -- "${repository_root}/package.json" "${repository_root}/pnpm-lock.yaml" "${plugin_dir}/"
-cp -R -- "${repository_root}/src" "${plugin_dir}/src"
+cp -R -- "${repository_root}/dist" "${plugin_dir}/dist"
 
 if [[ "${mode}" == "configured" ]]; then
   cp -- "${logo_file}" "${isolated_logo_file}"

@@ -28,7 +28,7 @@ test("documents executable package installation commands", async (context) => {
   const commands = fencedBlocks(installSection, "sh")
   assert.deepEqual(commands, [
     'opencode plugin "git+https://github.com/jonathan-tyler/' +
-      'opencode-custom-logo.git#v0.2.0" --global',
+      'opencode-custom-logo.git#v0.2.1" --global',
     "chezmoi apply",
   ])
 
@@ -47,7 +47,7 @@ test("documents executable package installation commands", async (context) => {
 set -eu
 test "$#" -eq 3
 test "$1" = plugin
-test "$2" = "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0"
+test "$2" = "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1"
 test "$3" = --global
 mkdir -p "$XDG_CONFIG_HOME/opencode"
 printf '%s\n' installed >"$XDG_CONFIG_HOME/opencode/tui.json"
@@ -88,6 +88,17 @@ test("keeps every README JSON example valid", () => {
   for (const example of examples) JSON.parse(example)
 })
 
+test("keeps every README shell example syntactically valid", async () => {
+  for (const example of fencedBlocks(readme, "sh")) {
+    await execFileAsync("sh", ["-n", "-c", example])
+  }
+})
+
+test("marks v0.2.0 as defective without using it in a package spec", () => {
+  assert.match(readme, /v0\.2\.0.*does not activate its TUI package entrypoint/su)
+  assert.doesNotMatch(readme, /opencode-custom-logo\.git#v0\.2\.0/u)
+})
+
 test("documents a generic default chezmoi source file", () => {
   const installSection = section(readme, "## Install", "## Configure")
   const chezmoiStart = installSection.indexOf("### chezmoi")
@@ -98,7 +109,7 @@ test("documents a generic default chezmoi source file", () => {
   assert.match(chezmoi, /~\/\.config\/opencode\/tui\.json/)
   assert.match(
     chezmoi,
-    /git\+https:\/\/github\.com\/jonathan-tyler\/opencode-custom-logo\.git#v0\.2\.0/,
+    /git\+https:\/\/github\.com\/jonathan-tyler\/opencode-custom-logo\.git#v0\.2\.1/,
   )
   assert.doesNotMatch(
     chezmoi,

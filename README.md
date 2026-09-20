@@ -7,8 +7,11 @@ OpenCode TUI plugin that replaces the home-screen logo with a configured multili
 The only supported installation command is:
 
 ```sh
-opencode plugin "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0" --global
+opencode plugin "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1" --global
 ```
+
+Version `v0.2.0` installs but does not activate its TUI package entrypoint
+correctly on supported OpenCode v1.18.0. Do not use or retag it.
 
 OpenCode synchronously installs this package and its production dependencies
 through its embedded package service before importing the TUI entry point. The
@@ -36,7 +39,7 @@ file to `~/.config/opencode/tui.json`. For example:
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0",
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1",
       {
         "logoFile": "logos/home-logo.txt"
       }
@@ -65,7 +68,7 @@ Add the plugin to `$XDG_CONFIG_HOME/opencode/tui.json`, or to
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0",
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1",
       {
         "logoFile": "logos/home-logo.txt"
       }
@@ -110,7 +113,7 @@ An inline `logo` string remains available as an alternative:
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0",
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.1",
       {
         "logo": "first line\nsecond line\nthird line"
       }
@@ -136,6 +139,7 @@ CLI and Podman installed:
 devcontainer up --workspace-folder . --docker-path podman
 devcontainer exec --workspace-folder . --docker-path podman pnpm test
 devcontainer exec --workspace-folder . --docker-path podman pnpm typecheck
+devcontainer exec --workspace-folder . --docker-path podman pnpm check:build
 ```
 
 Dependency installation runs automatically during container creation. If the
@@ -144,6 +148,11 @@ post-create setup fails, rerun the frozen install manually:
 ```sh
 devcontainer exec --workspace-folder . --docker-path podman pnpm install --frozen-lockfile
 ```
+
+TypeScript and TSX under `src/` are the editable source. The committed `dist/`
+files are the package runtime artifact. Regenerate them with
+`pnpm generate:artifact`, then run `pnpm check:build` to prove the output and
+packed file inventory are current.
 
 Inside the Dev Container, launch the bundled example with:
 
@@ -154,7 +163,7 @@ just tui-configured
 To use another logo file or launch the unconfigured harness, run:
 
 ```sh
-just tui-configured <logo-file>
+just tui-configured path/to/logo.txt
 just tui-unconfigured
 ```
 

@@ -1,13 +1,18 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "name": "opencode-custom-logo",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "exports": {
-    "./tui": "./src/index.tsx"
+    "./tui": "./dist/index.js"
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "check:build": "node script/check-build.mjs",
+    "generate:artifact": "node script/build.mjs",
     "test": "tsx --test --experimental-test-module-mocks test/**/*.test.ts",
     "typecheck": "tsc --noEmit"
   },
