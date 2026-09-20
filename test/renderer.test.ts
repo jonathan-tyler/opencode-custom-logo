@@ -4,14 +4,20 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
 
-test("renders file-backed and inline logos as complete escaped literals", async (context) => {
+type RenderNode = {
+  type: unknown
+  properties: Record<string, unknown>
+}
+
+test("renders file-backed and inline ANSI logos as safe styled runs", async (context) => {
   const configDirectory = await mkdtemp(join(tmpdir(), "opencode-custom-logo-test-"))
   context.after(() => rm(configDirectory, { recursive: true, force: true }))
-  const logoPath = join(configDirectory, "logo.md")
-  await writeFile(
-    logoPath,
-    "# literal Markdown\nfirst\n\u001b[31msecond\u001b[0m\n",
-  )
+  const logoPath = join(configDirectory, "logo.txt")
+  const styledLogo =
+    "\u001b[31;104;1;2;3;4;9mstandard\u001b[0m\n" +
+    "\u001b[38;5;120;48;5;136mindexed\u001b[0m\n" +
+    "\u001b[38;2;12;34;56;48;2;65;43;21mRGB\u001b[0m\n"
+  await writeFile(logoPath, styledLogo)
 
   const mockOptions = {
     exports: {
@@ -24,7 +30,7 @@ test("renders file-backed and inline logos as complete escaped literals", async 
 
   const { default: plugin } = await import("../src/index.js")
   let registered: {
-    slots: { home_logo: () => unknown }
+    slots: { home_logo: () => RenderNode }
   } | undefined
   const api = {
     state: {
@@ -40,36 +46,98 @@ test("renders file-backed and inline logos as complete escaped literals", async 
     },
   }
 
-  await plugin.tui(api as never, { logoFile: "logo.md" })
-
-  assert.deepEqual(registered?.slots.home_logo(), {
-    type: "text",
-    properties: {
-      children: "# literal Markdown\nfirst\n\\u001b[31msecond\\u001b[0m\n",
-    },
-  })
+  await plugin.tui(api as never, { logoFile: "logo.txt" })
+  const fileRender = summarize(registered?.slots.home_logo())
+  assert.deepEqual(fileRender, expectedStyledRender)
 
   await writeFile(logoPath, "changed\n")
-  assert.deepEqual(registered?.slots.home_logo(), {
+  assert.deepEqual(summarize(registered?.slots.home_logo()), expectedStyledRender)
+
+  await plugin.tui(api as never, { logoFile: "logo.txt" })
+  assert.deepEqual(summarize(registered?.slots.home_logo()), {
     type: "text",
-    properties: {
-      children: "# literal Markdown\nfirst\n\\u001b[31msecond\\u001b[0m\n",
-    },
+    properties: { children: [{ type: "span", properties: { children: "changed\n" } }] },
   })
 
-  await plugin.tui(api as never, { logoFile: "logo.md" })
-  assert.deepEqual(registered?.slots.home_logo(), {
-    type: "text",
-    properties: {
-      children: "changed\n",
-    },
-  })
+  await plugin.tui(api as never, { logo: styledLogo })
+  assert.deepEqual(summarize(registered?.slots.home_logo()), expectedStyledRender)
 
-  await plugin.tui(api as never, { logo: "inline\n\u001b[31msecond\u001b[0m" })
-  assert.deepEqual(registered?.slots.home_logo(), {
+  const unsafeLogo = "\u001b[5mblink\u001b[2Jerase\u001b]8;;https://example.com\u0007link"
+  await plugin.tui(api as never, { logo: unsafeLogo })
+  const safeRender = summarize(registered?.slots.home_logo())
+  assert.deepEqual(safeRender, {
     type: "text",
     properties: {
-      children: "inline\n\\u001b[31msecond\\u001b[0m",
+      children: [
+        {
+          type: "span",
+          properties: {
+            children:
+              "\\u001b[5mblink\\u001b[2Jerase\\u001b]8;;https://example.com\\u0007link",
+          },
+        },
+      ],
     },
   })
+  assert.doesNotMatch(renderedText(safeRender), /[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f-\u009f]/u)
 })
+
+const expectedStyledRender = {
+  type: "text",
+  properties: {
+    children: [
+      {
+        type: "span",
+        properties: {
+          fg: { intent: "indexed", slot: 1 },
+          bg: { intent: "indexed", slot: 12 },
+          attributes: 143,
+          children: "standard",
+        },
+      },
+      { type: "span", properties: { children: "\n" } },
+      {
+        type: "span",
+        properties: {
+          fg: { intent: "indexed", slot: 120 },
+          bg: { intent: "indexed", slot: 136 },
+          children: "indexed",
+        },
+      },
+      { type: "span", properties: { children: "\n" } },
+      {
+        type: "span",
+        properties: {
+          fg: { intent: "rgb", slot: 0, rgba: [12, 34, 56, 255] },
+          bg: { intent: "rgb", slot: 0, rgba: [65, 43, 21, 255] },
+          children: "RGB",
+        },
+      },
+      { type: "span", properties: { children: "\n" } },
+    ],
+  },
+}
+
+function summarize(node: unknown): unknown {
+  if (Array.isArray(node)) return node.map(summarize)
+  if (node === null || typeof node !== "object") return node
+  if ("intent" in node && "slot" in node && "toInts" in node) {
+    const color = node as {
+      intent: string
+      slot: number
+      toInts(): [number, number, number, number]
+    }
+    if (color.intent === "indexed") return { intent: color.intent, slot: color.slot }
+    return { intent: color.intent, slot: color.slot, rgba: color.toInts() }
+  }
+  return Object.fromEntries(Object.entries(node).map(([key, value]) => [key, summarize(value)]))
+}
+
+function renderedText(node: unknown): string {
+  if (typeof node === "string") return node
+  if (Array.isArray(node)) return node.map(renderedText).join("")
+  if (node === null || typeof node !== "object") return ""
+  if (!("properties" in node)) return ""
+  const properties = (node as { properties: Record<string, unknown> }).properties
+  return renderedText(properties.children)
+}

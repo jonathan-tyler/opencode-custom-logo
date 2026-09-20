@@ -41,9 +41,29 @@ Add the plugin to `$XDG_CONFIG_HOME/opencode/tui.json`, or to
 
 `logoFile` is resolved relative to the global OpenCode configuration directory
 that contains this `tui.json`. The file must be UTF-8. Its complete contents,
-including a final newline, are used as literal text; Markdown is not rendered.
-Terminal control characters other than line breaks are displayed as printable
-escapes, such as `\t` and `\u001b`, so ANSI sequences are not interpreted.
+including a final newline, are used as text; Markdown is not rendered.
+
+Both `logoFile` and inline `logo` content interpret this ANSI SGR subset by
+default:
+
+- foreground colors `30-37`, `90-97`, `38;5;n`, and `38;2;r;g;b`, with `39`
+  resetting the foreground;
+- background colors `40-47`, `100-107`, `48;5;n`, and `48;2;r;g;b`, with `49`
+  resetting the background;
+- bold (`1`), dim (`2`), italic (`3`), underline (`4`), and strikethrough (`9`),
+  with resets `22`, `23`, `24`, and `29`; and
+- reset-all (`0`).
+
+Indexed values and RGB channels must be between 0 and 255. Malformed,
+out-of-range, unsupported, or incomplete SGR and every non-SGR terminal control
+are displayed as printable escapes, e.g., `\u001b`, rather than sent to the
+terminal renderer. OpenCode Custom Logo v0.1.0 displayed even valid SGR escape
+bytes as printable text; valid supported SGR now applies formatting, with no
+literal-ESC compatibility switch.
+
+The bundled `examples/custom-logo.txt` demonstrates 256-color SGR with a reset
+on every row: light greens 120 and 84, dark gold 136, very dark green 22, and
+medium green 34.
 
 Restart OpenCode or otherwise reinitialize the plugin after changing the file.
 The plugin does not watch it for changes.

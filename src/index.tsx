@@ -2,19 +2,20 @@ import { readFile } from "node:fs/promises"
 import { isAbsolute, resolve } from "node:path"
 
 import type { TuiPluginModule } from "@opencode-ai/plugin/tui"
+import { RGBA, TextAttributes } from "@opentui/core"
+
+import {
+  escapeControlCharacters,
+  parseAnsiStyledLogo,
+  type AnsiColor,
+  type AnsiStyle,
+} from "./ansi.js"
+
+export { escapeControlCharacters, parseAnsiStyledLogo } from "./ansi.js"
 
 type CustomLogoOptions = {
   logo?: unknown
   logoFile?: unknown
-}
-
-const CONTROL_CHARACTER = /[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f-\u009f]/gu
-
-export function escapeControlCharacters(logo: string): string {
-  return logo.replace(CONTROL_CHARACTER, (character) => {
-    if (character === "\t") return "\\t"
-    return `\\u${character.codePointAt(0)!.toString(16).padStart(4, "0")}`
-  })
 }
 
 const plugin = {
@@ -48,13 +49,43 @@ const plugin = {
     }
     if (typeof logo !== "string") return
 
-    const literalLogo = escapeControlCharacters(logo)
+    const runs = parseAnsiStyledLogo(logo)
     api.slots.register({
       slots: {
-        home_logo: () => <text>{literalLogo}</text>,
+        home_logo: () => (
+          <text>
+            {runs.map((run) => (
+              <span {...textProperties(run.style)}>{run.text}</span>
+            ))}
+          </text>
+        ),
       },
     })
   },
 } satisfies TuiPluginModule
 
 export default plugin
+
+function textProperties(style: AnsiStyle): {
+  fg?: RGBA
+  bg?: RGBA
+  attributes?: number
+} {
+  const properties: { fg?: RGBA; bg?: RGBA; attributes?: number } = {}
+  if (style.foreground) properties.fg = toOpenTuiColor(style.foreground)
+  if (style.background) properties.bg = toOpenTuiColor(style.background)
+
+  let attributes = TextAttributes.NONE
+  if (style.bold) attributes |= TextAttributes.BOLD
+  if (style.dim) attributes |= TextAttributes.DIM
+  if (style.italic) attributes |= TextAttributes.ITALIC
+  if (style.underline) attributes |= TextAttributes.UNDERLINE
+  if (style.strikethrough) attributes |= TextAttributes.STRIKETHROUGH
+  if (attributes !== TextAttributes.NONE) properties.attributes = attributes
+  return properties
+}
+
+function toOpenTuiColor(color: AnsiColor): RGBA {
+  if (color.type === "indexed") return RGBA.fromIndex(color.value)
+  return RGBA.fromInts(color.red, color.green, color.blue)
+}
