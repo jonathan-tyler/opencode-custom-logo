@@ -64,7 +64,40 @@ test("renders file-backed and inline ANSI logos as safe styled runs", async (con
   await plugin.tui(api as never, { logo: styledLogo })
   assert.deepEqual(summarize(registered?.slots.home_logo()), expectedStyledRender)
 
-  const unsafeLogo = "\u001b[5mblink\u001b[2Jerase\u001b]8;;https://example.com\u0007link"
+  const resetLogo =
+    "\u001b[31;44;1;2;3;4;9mstyled\nline\u001b[39;49;22;23;24;29mλ" +
+    "\u001b[38;5;0mzero\u001b[38;5;255mmax\u001b[38;2;0;255;0mRGB"
+  await plugin.tui(api as never, { logo: resetLogo })
+  assert.deepEqual(summarize(registered?.slots.home_logo()), {
+    type: "text",
+    properties: {
+      children: [
+        {
+          type: "span",
+          properties: {
+            style: {
+              fg: "#800000",
+              bg: "#000080",
+              bold: true,
+              dim: true,
+              italic: true,
+              underline: true,
+              strikethrough: true,
+            },
+            children: "styled\nline",
+          },
+        },
+        { type: "span", properties: { style: {}, children: "λ" } },
+        { type: "span", properties: { style: { fg: "#000000" }, children: "zero" } },
+        { type: "span", properties: { style: { fg: "#eeeeee" }, children: "max" } },
+        { type: "span", properties: { style: { fg: "#00ff00" }, children: "RGB" } },
+      ],
+    },
+  })
+
+  const unsafeLogo =
+    "\u001b[5mblink\u001b[38;5;256mrange\u001b[48;2;0;1;999mmalformed" +
+    "\u001b[2Jerase\u001b]8;;https://example.com\u0007link"
   await plugin.tui(api as never, { logo: unsafeLogo })
   const safeRender = summarize(registered?.slots.home_logo())
   assert.deepEqual(safeRender, {
@@ -76,7 +109,9 @@ test("renders file-backed and inline ANSI logos as safe styled runs", async (con
           properties: {
             style: {},
             children:
-              "\\u001b[5mblink\\u001b[2Jerase\\u001b]8;;https://example.com\\u0007link",
+              "\\u001b[5mblink\\u001b[38;5;256mrange" +
+              "\\u001b[48;2;0;1;999mmalformed\\u001b[2Jerase" +
+              "\\u001b]8;;https://example.com\\u0007link",
           },
         },
       ],
