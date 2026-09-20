@@ -4,21 +4,56 @@ OpenCode TUI plugin that replaces the home-screen logo with a configured multili
 
 ## Install
 
-Clone the repository, change into the checkout, and run the repository-owned
-installer:
+The only supported installation command is:
 
 ```sh
-git clone https://github.com/jonathan-tyler/opencode-custom-logo
-cd opencode-custom-logo
-./script/install.sh
+opencode plugin "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0" --global
 ```
 
-The script installs the runtime package and its production dependencies at
-`$XDG_CONFIG_HOME/opencode/plugins/opencode-custom-logo`. When
-`XDG_CONFIG_HOME` is not set, it uses
-`$HOME/.config/opencode/plugins/opencode-custom-logo`. It refuses to replace an
-existing installation. The installed package exposes its OpenCode TUI entry
-point as `./tui`.
+OpenCode synchronously installs this package and its production dependencies
+through its embedded package service before importing the TUI entry point. The
+flow requires Git and network access, including registry access for production
+dependencies, but does not require a user-accessible `node`, `npm`, `npx`,
+`pnpm`, or `bun` command.
+
+OpenCode caches the complete immutable package spec. To update, change the spec
+in the global configuration to a new tag or commit. Rerunning the same spec, or
+adding `--force`, does not refresh the cached package.
+
+The install command adds a string entry to the global `tui.json`. To configure
+`logoFile` or inline `logo`, change that entry to the tuple shown below. Merge
+the tuple into existing `tui.json` content instead of replacing unrelated
+configuration.
+
+### chezmoi
+
+With chezmoi's default source directory, manage
+`~/.local/share/chezmoi/dot_config/opencode/tui.json`; chezmoi maps that source
+file to `~/.config/opencode/tui.json`. For example:
+
+```json
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "plugin": [
+    [
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0",
+      {
+        "logoFile": "logos/home-logo.txt"
+      }
+    ]
+  ]
+}
+```
+
+Merge this tuple into an existing source file rather than replacing unrelated
+configuration, then apply the source state:
+
+```sh
+chezmoi apply
+```
+
+OpenCode installs the package and its production dependencies when it next loads
+the configured immutable spec.
 
 ## Configure
 
@@ -30,7 +65,7 @@ Add the plugin to `$XDG_CONFIG_HOME/opencode/tui.json`, or to
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "./plugins/opencode-custom-logo",
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0",
       {
         "logoFile": "logos/home-logo.txt"
       }
@@ -75,7 +110,7 @@ An inline `logo` string remains available as an alternative:
   "$schema": "https://opencode.ai/tui.json",
   "plugin": [
     [
-      "./plugins/opencode-custom-logo",
+      "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#v0.2.0",
       {
         "logo": "first line\nsecond line\nthird line"
       }
