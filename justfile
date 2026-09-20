@@ -1,7 +1,7 @@
 set positional-arguments
 
 # Launch the isolated TUI with a configured custom logo.
-tui-configured logo-file:
+tui-configured logo-file="examples/custom-logo.txt":
     ./script/tui-visual-check.sh configured "$1"
 
 # Launch the isolated TUI without the plugin configuration.
