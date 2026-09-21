@@ -37,7 +37,8 @@ test(
       },
     })
     const packageRevision = await commit(packageRepository)
-    const packageSpec = `git+${pathToFileURL(packageRepository).href}#${packageRevision}`
+    const packageSpec =
+      `opencode-custom-logo@git+${pathToFileURL(packageRepository).href}#${packageRevision}`
 
     for (const scenario of [
       {
@@ -121,6 +122,7 @@ test(
         ) as { plugin: unknown[] }
         assert.deepEqual(tupleConfiguration.plugin, [[packageSpec, scenario.options]])
 
+        await writeForbiddenShim(shims, "git")
         const output = await renderUntil(project, environment, scenario.marker)
         assert.match(
           output,
@@ -135,7 +137,11 @@ test(
         const forbiddenCommands = (await exists(forbiddenLog))
           ? await readFile(forbiddenLog, "utf8")
           : ""
-        assert.equal(forbiddenCommands, "", "user path invoked an external package manager")
+        assert.equal(
+          forbiddenCommands,
+          "",
+          "warm package load invoked Git or an external package manager",
+        )
       })
     }
   },
@@ -182,16 +188,20 @@ async function findInstalledPackage(cacheHome: string): Promise<string> {
 
 async function writeForbiddenShims(directory: string): Promise<void> {
   for (const command of ["node", "npm", "npx", "pnpm", "bun"]) {
-    const shim = join(directory, command)
-    await writeFile(
-      shim,
-      `#!/bin/sh
+    await writeForbiddenShim(directory, command)
+  }
+}
+
+async function writeForbiddenShim(directory: string, command: string): Promise<void> {
+  const shim = join(directory, command)
+  await writeFile(
+    shim,
+    `#!/bin/sh
 printf '%s\\n' "$0 $*" >>"$FORBIDDEN_COMMAND_LOG"
 exit 97
 `,
-    )
-    await chmod(shim, 0o755)
-  }
+  )
+  await chmod(shim, 0o755)
 }
 
 async function renderUntil(

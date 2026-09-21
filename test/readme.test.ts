@@ -8,6 +8,8 @@ import { promisify } from "node:util"
 
 const execFileAsync = promisify(execFile)
 const readme = await readFile(new URL("../README.md", import.meta.url), "utf8")
+const namedPackageSpec =
+  "opencode-custom-logo@git+https://github.com/jonathan-tyler/opencode-custom-logo.git#vX.Y.Z"
 
 function section(markdown: string, heading: string, nextHeading: string): string {
   const start = markdown.indexOf(heading)
@@ -27,8 +29,7 @@ test("documents executable package installation commands", async (context) => {
   const installSection = section(readme, "## Install", "## Configure")
   const commands = fencedBlocks(installSection, "sh")
   assert.deepEqual(commands, [
-    'opencode plugin "git+https://github.com/jonathan-tyler/' +
-      'opencode-custom-logo.git#vX.Y.Z" --global',
+    `opencode plugin "${namedPackageSpec}" --global`,
     "chezmoi apply",
   ])
 
@@ -47,7 +48,7 @@ test("documents executable package installation commands", async (context) => {
 set -eu
 test "$#" -eq 3
 test "$1" = plugin
-test "$2" = "git+https://github.com/jonathan-tyler/opencode-custom-logo.git#vX.Y.Z"
+test "$2" = "${namedPackageSpec}"
 test "$3" = --global
 mkdir -p "$XDG_CONFIG_HOME/opencode"
 printf '%s\n' installed >"$XDG_CONFIG_HOME/opencode/tui.json"
@@ -109,6 +110,21 @@ test("uses a stable pseudoversion without routine release history", () => {
   assert.doesNotMatch(readme, /\bv0\.(?:1|2)\.0\b/u)
 })
 
+test("uses the package-name prefix for every public Git package spec", () => {
+  const packageSpecs = [
+    ...readme.matchAll(
+      /(?:opencode-custom-logo@)?git\+https:\/\/github\.com\/jonathan-tyler\/opencode-custom-logo\.git#vX\.Y\.Z/gu,
+    ),
+  ].map(([spec]) => spec)
+
+  assert.equal(packageSpecs.length, 4)
+  assert.deepEqual([...new Set(packageSpecs)], [namedPackageSpec])
+  assert.doesNotMatch(
+    readme,
+    /["']git\+https:\/\/github\.com\/jonathan-tyler\/opencode-custom-logo\.git#/u,
+  )
+})
+
 test("documents a generic default chezmoi source file", () => {
   const installSection = section(readme, "## Install", "## Configure")
   const chezmoiStart = installSection.indexOf("### chezmoi")
@@ -119,7 +135,7 @@ test("documents a generic default chezmoi source file", () => {
   assert.match(chezmoi, /~\/\.config\/opencode\/tui\.json/)
   assert.match(
     chezmoi,
-    /git\+https:\/\/github\.com\/jonathan-tyler\/opencode-custom-logo\.git#vX\.Y\.Z/,
+    /opencode-custom-logo@git\+https:\/\/github\.com\/jonathan-tyler\/opencode-custom-logo\.git#vX\.Y\.Z/,
   )
   assert.doesNotMatch(
     chezmoi,
