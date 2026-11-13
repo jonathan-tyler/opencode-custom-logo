@@ -2,6 +2,15 @@
 
 OpenCode TUI plugin that replaces the home-screen logo with a configured multiline string.
 
+## ⚠️ OpenCode version support
+
+This plugin is not compatible with OpenCode v2. It uses the v1 TUI plugin API
+and `home_logo` slot. OpenCode v2 requires [porting v1 plugins](https://opencode.ai/docs/build/plugins/migrate-v1/)
+to its new API, and its [documented TUI slots](https://opencode.ai/docs/build/plugins/cli/)
+do not include `home_logo`.
+
+Last tested with **OpenCode v1.19.5**. The instructions below target OpenCode v1.
+
 ## Install
 
 The only supported installation command is:
